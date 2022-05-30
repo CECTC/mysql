@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 	"vimagination.zapto.org/byteio"
 
 	"github.com/cectc/mysql/schema"

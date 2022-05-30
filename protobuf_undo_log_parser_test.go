@@ -78,13 +78,13 @@ func getBranchUndoLog() *branchUndoLog {
 	return branchUndoLog
 }
 
-func TestJsonUndoLogParser_Encode(t *testing.T) {
+func TestProtoUndoLogParser_Encode(t *testing.T) {
 	data := ProtoBufUndoLogParser{}.Encode(getBranchUndoLog())
 	fmt.Printf("%s\n", data)
 	assert.NotEqual(t, data, nil)
 }
 
-func TestJsonUndoLogParser_Decode(t *testing.T) {
+func TestProtoUndoLogParser_Decode(t *testing.T) {
 	branchUndoLog := getBranchUndoLog()
 	data := ProtoBufUndoLogParser{}.Encode(branchUndoLog)
 	undoLog := ProtoBufUndoLogParser{}.Decode(data)
