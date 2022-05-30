@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package mysql;
+option go_package=".;mysql";
+
+import "table_records.proto";
+
+message PbSqlUndoLog {
+    int32 SqlType = 1;
+    string SchemaName = 2;
+    string TableName = 3;
+    string LockKey = 4;
+    PbTableRecords BeforeImage = 5;
+    PbTableRecords AfterImage = 6;
+}
+
+message PbBranchUndoLog {
+    string XID = 1;
+    int64 BranchSessionID = 2;
+    repeated PbSqlUndoLog SqlUndoLogs = 3;
+}
