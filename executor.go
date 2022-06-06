@@ -172,21 +172,19 @@ func (executor *insertExecutor) BuildTableRecords(pkValues []driver.Value) (*sch
 		return nil, err
 	}
 	var sb strings.Builder
-	fmt.Fprint(&sb, "SELECT ")
-	var i = 0
+	sb.WriteString("SELECT ")
 	columnCount := len(tableMeta.Columns)
-	for _, column := range tableMeta.Columns {
-		fmt.Fprint(&sb, misc.CheckAndReplace(column))
-		i = i + 1
-		if i < columnCount {
-			fmt.Fprint(&sb, ",")
+	for i, column := range tableMeta.Columns {
+		sb.WriteString(misc.CheckAndReplace(column))
+		if i < columnCount-1 {
+			sb.WriteByte(',')
 		} else {
-			fmt.Fprint(&sb, " ")
+			sb.WriteByte(' ')
 		}
 	}
-	fmt.Fprintf(&sb, "FROM %s ", executor.GetTableName())
-	fmt.Fprintf(&sb, " WHERE `%s` IN ", tableMeta.GetPKName())
-	fmt.Fprint(&sb, appendInParam(len(pkValues)))
+	sb.WriteString(fmt.Sprintf("FROM %s ", executor.GetTableName()))
+	sb.WriteString(fmt.Sprintf(" WHERE `%s` IN ", tableMeta.GetPKName()))
+	sb.WriteString(appendInParam(len(pkValues)))
 
 	rows, err := executor.mc.prepareQuery(sb.String(), pkValues)
 	if err != nil {
@@ -298,21 +296,19 @@ func (executor *deleteExecutor) buildTableRecords(tableMeta schema.TableMeta) (*
 
 func (executor *deleteExecutor) buildBeforeImageSql(tableMeta schema.TableMeta) string {
 	var b strings.Builder
-	fmt.Fprint(&b, "SELECT ")
-	var i = 0
+	b.WriteString("SELECT ")
 	columnCount := len(tableMeta.Columns)
-	for _, column := range tableMeta.Columns {
-		fmt.Fprint(&b, misc.CheckAndReplace(column))
-		i = i + 1
-		if i < columnCount {
-			fmt.Fprint(&b, ",")
+	for i, column := range tableMeta.Columns {
+		b.WriteString(misc.CheckAndReplace(column))
+		if i < columnCount-1 {
+			b.WriteByte(',')
 		} else {
-			fmt.Fprint(&b, " ")
+			b.WriteByte(' ')
 		}
 	}
-	fmt.Fprintf(&b, " FROM %s WHERE ", executor.GetTableName())
-	fmt.Fprint(&b, executor.GetWhereCondition())
-	fmt.Fprint(&b, " FOR UPDATE")
+	b.WriteString(fmt.Sprintf(" FROM %s WHERE ", executor.GetTableName()))
+	b.WriteString(executor.GetWhereCondition())
+	b.WriteString(" FOR UPDATE")
 	return b.String()
 }
 
@@ -431,21 +427,19 @@ func (executor *updateExecutor) AfterImage(beforeImage *schema.TableRecords) (*s
 
 func (executor *updateExecutor) buildAfterImageSql(tableMeta schema.TableMeta, beforeImage *schema.TableRecords) string {
 	var b strings.Builder
-	fmt.Fprint(&b, "SELECT ")
-	var i = 0
+	b.WriteString("SELECT ")
 	columnCount := len(tableMeta.Columns)
-	for _, columnName := range tableMeta.Columns {
-		fmt.Fprint(&b, misc.CheckAndReplace(columnName))
-		i = i + 1
-		if i < columnCount {
-			fmt.Fprint(&b, ",")
+	for i, columnName := range tableMeta.Columns {
+		b.WriteString(misc.CheckAndReplace(columnName))
+		if i < columnCount-1 {
+			b.WriteByte(',')
 		} else {
-			fmt.Fprint(&b, " ")
+			b.WriteByte(' ')
 		}
 	}
-	fmt.Fprintf(&b, " FROM %s ", executor.GetTableName())
-	fmt.Fprintf(&b, "WHERE `%s` IN", tableMeta.GetPKName())
-	fmt.Fprint(&b, misc.MysqlAppendInParam(len(beforeImage.PKFields())))
+	b.WriteString(fmt.Sprintf(" FROM %s ", executor.GetTableName()))
+	b.WriteString(fmt.Sprintf("WHERE `%s` IN", tableMeta.GetPKName()))
+	b.WriteString(misc.MysqlAppendInParam(len(beforeImage.PKFields())))
 	return b.String()
 }
 
@@ -461,21 +455,19 @@ func (executor *updateExecutor) buildTableRecords(tableMeta schema.TableMeta) (*
 
 func (executor *updateExecutor) buildBeforeImageSql(tableMeta schema.TableMeta) string {
 	var b strings.Builder
-	fmt.Fprint(&b, "SELECT ")
-	var i = 0
+	b.WriteString("SELECT ")
 	columnCount := len(tableMeta.Columns)
-	for _, column := range tableMeta.Columns {
-		fmt.Fprint(&b, misc.CheckAndReplace(column))
-		i = i + 1
-		if i != columnCount {
-			fmt.Fprint(&b, ",")
+	for i, column := range tableMeta.Columns {
+		b.WriteString(misc.CheckAndReplace(column))
+		if i < columnCount-1 {
+			b.WriteByte(',')
 		} else {
-			fmt.Fprint(&b, " ")
+			b.WriteByte(' ')
 		}
 	}
-	fmt.Fprintf(&b, " FROM %s WHERE ", executor.GetTableName())
-	fmt.Fprint(&b, executor.GetWhereCondition())
-	fmt.Fprint(&b, " FOR UPDATE")
+	b.WriteString(fmt.Sprintf(" FROM %s WHERE ", executor.GetTableName()))
+	b.WriteString(executor.GetWhereCondition())
+	b.WriteString(" FOR UPDATE")
 	return b.String()
 }
 
@@ -506,20 +498,18 @@ func (executor *globalLockExecutor) GetWhereCondition() string {
 
 func (executor *globalLockExecutor) buildBeforeImageSql(tableMeta schema.TableMeta) string {
 	var b strings.Builder
-	fmt.Fprint(&b, "SELECT ")
-	var i = 0
+	b.WriteString("SELECT ")
 	columnCount := len(tableMeta.Columns)
-	for _, column := range tableMeta.Columns {
-		fmt.Fprint(&b, misc.CheckAndReplace(column))
-		i = i + 1
-		if i < columnCount {
-			fmt.Fprint(&b, ",")
+	for i, column := range tableMeta.Columns {
+		b.WriteString(misc.CheckAndReplace(column))
+		if i < columnCount-1 {
+			b.WriteByte(',')
 		} else {
-			fmt.Fprint(&b, " ")
+			b.WriteByte(' ')
 		}
 	}
-	fmt.Fprintf(&b, " FROM %s WHERE ", executor.GetTableName())
-	fmt.Fprint(&b, executor.GetWhereCondition())
+	b.WriteString(fmt.Sprintf(" FROM %s WHERE ", executor.GetTableName()))
+	b.WriteString(executor.GetWhereCondition())
 	return b.String()
 }
 
@@ -575,14 +565,14 @@ func (executor *globalLockExecutor) Executable(lockRetryInterval time.Duration, 
 
 func appendInParam(size int) string {
 	var sb strings.Builder
-	fmt.Fprintf(&sb, "(")
+	sb.WriteByte('(')
 	for i := 0; i < size; i++ {
-		fmt.Fprintf(&sb, "?")
+		sb.WriteByte('?')
 		if i < size-1 {
-			fmt.Fprint(&sb, ",")
+			sb.WriteByte(',')
 		}
 	}
-	fmt.Fprintf(&sb, ")")
+	sb.WriteByte(')')
 	return sb.String()
 }
 
@@ -592,14 +582,19 @@ func buildLockKey(lockKeyRecords *schema.TableRecords) string {
 	}
 
 	var sb strings.Builder
-	fmt.Fprintf(&sb, lockKeyRecords.TableName)
-	fmt.Fprint(&sb, ":")
+	sb.WriteString(lockKeyRecords.TableName)
+	sb.WriteByte(':')
 	fields := lockKeyRecords.PKFields()
 	length := len(fields)
 	for i, field := range fields {
-		fmt.Fprint(&sb, field.Value)
+		_, isByte := field.Value.([]byte)
+		if isByte {
+			sb.WriteString(fmt.Sprintf("%s", field.Value))
+		} else {
+			sb.WriteString(fmt.Sprintf("%v", field.Value))
+		}
 		if i < length-1 {
-			fmt.Fprint(&sb, ",")
+			sb.WriteByte(',')
 		}
 	}
 	return sb.String()
