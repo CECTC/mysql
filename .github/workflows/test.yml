@@ -87,19 +87,5 @@ jobs:
         run: |
           go test -v '-covermode=count' '-coverprofile=coverage.out'
 
-      - name: Send coverage
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.out
-          flag-name: ${{ runner.os }}-Go-${{ matrix.go }}-DB-${{ matrix.mysql }}
-          parallel: true
-
-  # notifies that all test jobs are finished.
-  finish:
-    needs: test
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: shogo82148/actions-goveralls@v1
-        with:
-          parallel-finished: true
+      - name: Post Coverage
+        run: bash <(curl -s https://codecov.io/bash)
