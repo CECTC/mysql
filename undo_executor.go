@@ -178,8 +178,18 @@ func (executor UndoExecutor) dataValidationAndGoOn(conn *mysqlConn) (bool, error
 			log.Info("Stop rollback because there is no data change between the before data snapshot and the after data snapshot.")
 			return false, nil
 		} else {
-			oldRows, _ := json.Marshal(executor.sqlUndoLog.AfterImage.Rows)
-			newRows, _ := json.Marshal(currentRecords.Rows)
+			var (
+				oldRows, newRows []byte
+				err              error
+			)
+			if oldRows, err = json.Marshal(executor.sqlUndoLog.AfterImage.Rows); err != nil {
+				return false, err
+			}
+			if currentRecords != nil {
+				if newRows, err = json.Marshal(currentRecords.Rows); err != nil {
+					return false, err
+				}
+			}
 			log.Errorf("check dirty datas failed, old and new data are not equal, tableName:[%s], oldRows:[%s], newRows:[%s].",
 				executor.sqlUndoLog.TableName, string(oldRows), string(newRows))
 			return false, errors.New("Has dirty records when undo.")
