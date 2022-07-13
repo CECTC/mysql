@@ -159,7 +159,7 @@ func (stmt *mysqlStmt) Query(args []driver.Value) (driver.Rows, error) {
 				stmt:        selectForUpdateStmt,
 				args:        args,
 			}
-			return executor.Execute(config.GetATConfig().LockRetryInterval, config.GetATConfig().LockRetryTimes)
+			return executor.Execute(stmt.mc.ctx.xid, config.GetATConfig().LockRetryInterval, config.GetATConfig().LockRetryTimes)
 		}
 	}
 

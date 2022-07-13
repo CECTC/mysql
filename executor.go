@@ -317,7 +317,7 @@ func (executor *deleteExecutor) getTableMeta() (schema.TableMeta, error) {
 	return tableMetaCache.GetTableMeta(executor.mc, executor.GetTableName())
 }
 
-func (executor *selectForUpdateExecutor) Execute(lockRetryInterval time.Duration, lockRetryTimes int) (driver.Rows, error) {
+func (executor *selectForUpdateExecutor) Execute(xid string, lockRetryInterval time.Duration, lockRetryTimes int) (driver.Rows, error) {
 	tableMeta, err := executor.getTableMeta()
 	if err != nil {
 		return nil, err
@@ -336,7 +336,7 @@ func (executor *selectForUpdateExecutor) Execute(lockRetryInterval time.Duration
 			var err error
 			for i := 0; i < lockRetryTimes; i++ {
 				lockable, err = core.GetDistributedTransactionManager().
-					IsLockable(context.Background(), executor.mc.cfg.DBName, lockKeys)
+					IsLockableWithXID(context.Background(), xid, executor.mc.cfg.DBName, lockKeys)
 				if lockable && err == nil {
 					break
 				}

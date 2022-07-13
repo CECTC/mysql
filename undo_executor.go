@@ -40,11 +40,11 @@ func DeleteBuildUndoSql(undoLog sqlUndoLog) string {
 	var sbCols, sbVals strings.Builder
 	var size = len(fields)
 	for i, field := range fields {
-		fmt.Fprintf(&sbCols, "`%s`", field.Name)
-		fmt.Fprint(&sbVals, "?")
+		sbCols.WriteString(fmt.Sprintf("`%s`", field.Name))
+		sbVals.WriteByte('?')
 		if i < size-1 {
-			fmt.Fprint(&sbCols, ", ")
-			fmt.Fprint(&sbVals, ", ")
+			sbCols.WriteString(", ")
+			sbVals.WriteString(", ")
 		}
 	}
 	insertColumns := sbCols.String()
@@ -79,9 +79,9 @@ func UpdateBuildUndoSql(undoLog sqlUndoLog) string {
 	var sb strings.Builder
 	var size = len(nonPkFields)
 	for i, field := range nonPkFields {
-		fmt.Fprintf(&sb, "`%s` = ?", field.Name)
+		sb.WriteString(fmt.Sprintf("`%s` = ?", field.Name))
 		if i < size-1 {
-			fmt.Fprint(&sb, ", ")
+			sb.WriteString(", ")
 		}
 	}
 	updateColumns := sb.String()
@@ -178,8 +178,18 @@ func (executor UndoExecutor) dataValidationAndGoOn(conn *mysqlConn) (bool, error
 			log.Info("Stop rollback because there is no data change between the before data snapshot and the after data snapshot.")
 			return false, nil
 		} else {
-			oldRows, _ := json.Marshal(executor.sqlUndoLog.AfterImage.Rows)
-			newRows, _ := json.Marshal(currentRecords.Rows)
+			var (
+				oldRows, newRows []byte
+				err              error
+			)
+			if oldRows, err = json.Marshal(executor.sqlUndoLog.AfterImage.Rows); err != nil {
+				return false, err
+			}
+			if currentRecords != nil {
+				if newRows, err = json.Marshal(currentRecords.Rows); err != nil {
+					return false, err
+				}
+			}
 			log.Errorf("check dirty datas failed, old and new data are not equal, tableName:[%s], oldRows:[%s], newRows:[%s].",
 				executor.sqlUndoLog.TableName, string(oldRows), string(newRows))
 			return false, errors.New("Has dirty records when undo.")
@@ -207,12 +217,12 @@ func (executor UndoExecutor) queryCurrentRecords(conn *mysqlConn) (*schema.Table
 	var i = 0
 	columnCount := len(tableMeta.Columns)
 	for _, columnName := range tableMeta.Columns {
-		fmt.Fprint(&b, misc.CheckAndReplace(columnName))
+		b.WriteString(misc.CheckAndReplace(columnName))
 		i = i + 1
 		if i < columnCount {
-			fmt.Fprint(&b, ",")
+			b.WriteByte(',')
 		} else {
-			fmt.Fprint(&b, " ")
+			b.WriteByte(' ')
 		}
 	}
 
