@@ -22,11 +22,11 @@ import (
 
 	"github.com/cectc/dbpack/pkg/log"
 	"github.com/cectc/hptx/pkg/config"
+	"github.com/cectc/hptx/pkg/constant"
 	"github.com/pingcap/parser"
 	"github.com/pingcap/parser/ast"
 )
 
-const XID = "XID"
 const GlobalLock = "GlobalLock"
 
 type connCtx struct {
@@ -588,7 +588,7 @@ func (mc *mysqlConn) BeginTx(ctx context.Context, opts driver.TxOptions) (driver
 		}
 	}
 
-	val := ctx.Value(XID)
+	val := ctx.Value(constant.XID)
 	if val != nil {
 		if xid, ok := val.(string); ok {
 			mc.ctx = &connCtx{
