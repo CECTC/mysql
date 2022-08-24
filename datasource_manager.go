@@ -7,6 +7,7 @@ import (
 	"github.com/cectc/dbpack/pkg/dt/api"
 	"github.com/cectc/dbpack/pkg/log"
 	"github.com/cectc/hptx/pkg/core"
+	"github.com/cectc/hptx/pkg/resource"
 	"github.com/pkg/errors"
 )
 
@@ -25,11 +26,7 @@ func init() {
 	}
 }
 
-func GetDataSourceManager() DataSourceManager {
-	return dataSourceManager
-}
-
-func RegisterResource(dsn string) {
+func RegisterATResource(dsn string) {
 	cfg, err := ParseDSN(dsn)
 	if err == nil {
 		c := &connector{
@@ -38,6 +35,7 @@ func RegisterResource(dsn string) {
 		dataSourceManager.ResourceCache[c.cfg.DBName] = c
 		InitTableMetaCache(c.cfg.DBName)
 	}
+	resource.InitATBranchResource(dataSourceManager)
 }
 
 func (resourceManager DataSourceManager) GetConnection(resourceID string) *mysqlConn {
